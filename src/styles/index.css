@@ -106,6 +106,10 @@ body {
 		inset 0 0 0 6px rgba(2, 6, 23, 0.2);
 }
 
+.wheel-frame-spinning {
+	animation: wheelSpinGlow 1.1s ease-in-out infinite;
+}
+
 .wheel-frame::before {
 	content: "";
 	position: absolute;
@@ -189,6 +193,72 @@ body {
 	border-right: 16px solid transparent;
 	border-top: 30px solid #fde047;
 	filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+}
+
+.pointer-active {
+	animation: pointerTick 0.12s ease-in-out infinite alternate;
+}
+
+.timer-urgent {
+	animation: timerUrgentPulse 1s ease-in-out infinite;
+}
+
+.timer-finished {
+	animation: timerFinishedPop 0.8s ease;
+}
+
+@keyframes wheelSpinGlow {
+	0% {
+		box-shadow:
+			0 18px 46px rgba(2, 6, 23, 0.5),
+			inset 0 0 0 6px rgba(2, 6, 23, 0.2);
+	}
+	50% {
+		box-shadow:
+			0 18px 46px rgba(2, 6, 23, 0.5),
+			0 0 0 3px color-mix(in oklab, var(--accent-strong) 55%, transparent),
+			0 0 26px color-mix(in oklab, var(--accent-soft) 58%, transparent),
+			inset 0 0 0 6px rgba(2, 6, 23, 0.2);
+	}
+	100% {
+		box-shadow:
+			0 18px 46px rgba(2, 6, 23, 0.5),
+			inset 0 0 0 6px rgba(2, 6, 23, 0.2);
+	}
+}
+
+@keyframes pointerTick {
+	0% {
+		transform: translateX(-50%) rotate(0deg);
+	}
+	100% {
+		transform: translateX(-50%) rotate(-5deg);
+	}
+}
+
+@keyframes timerUrgentPulse {
+	0%,
+	100% {
+		box-shadow: 0 0 0 0 rgba(251, 146, 60, 0);
+	}
+	50% {
+		box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent-soft) 35%, transparent);
+	}
+}
+
+@keyframes timerFinishedPop {
+	0% {
+		transform: scale(0.98);
+		filter: brightness(1);
+	}
+	35% {
+		transform: scale(1.02);
+		filter: brightness(1.18);
+	}
+	100% {
+		transform: scale(1);
+		filter: brightness(1);
+	}
 }
 
 @media (max-width: 520px) {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
 	THEME_DEFINITIONS,
 	type VisualStyle,
@@ -74,44 +74,51 @@ const formatTimer = (totalSeconds: number): string => {
 	return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 };
 
+const getItemBaseWeight = (item: string): number => {
+  const penalidades = ["passou a vez", "perdeu tudo", "volte o início", "0"];
+  const itemMinusculo = item.toLowerCase().trim();
+  
+  if (penalidades.some(p => itemMinusculo.includes(p))) {
+    return 10; 
+  }
+  return 30; 
+};
+
 const pickWeightedIndex = (
-	items: string[],
-	difficulty: DifficultyMode,
+  items: string[],
+  difficulty: DifficultyMode,
 ): number => {
-	if (items.length <= 1) return 0;
+  if (items.length <= 1) return 0;
 
-	const frequencies = new Map<string, number>();
-	for (const item of items) {
-		frequencies.set(item, (frequencies.get(item) ?? 0) + 1);
-	}
+  const weights = items.map((item) => {
+    const baseWeight = getItemBaseWeight(item);
+    const isPenalty = baseWeight === 10;
 
-	const weights = items.map((item, index) => {
-		const frequency = frequencies.get(item) ?? 1;
-		const positionFactor = (index + 1) / items.length;
+    switch (difficulty) {
+      case "facil":
+        return isPenalty ? baseWeight * 0.3 : baseWeight * 1.5;
+      
+      case "dificil":
+        return isPenalty ? baseWeight * 2.5 : baseWeight * 0.5;
+      
+      case "equilibrado":
+      default:
+        return baseWeight;
+    }
+  });
 
-		if (difficulty === "facil") {
-			return 1 + (1 - positionFactor) + frequency * 0.45;
-		}
+  const totalWeight = weights.reduce((sum, value) => sum + value, 0);
+  const randomValue = Math.random() * totalWeight;
 
-		if (difficulty === "dificil") {
-			return 1 + positionFactor + 1 / frequency;
-		}
+  let cumulative = 0;
+  for (let index = 0; index < weights.length; index += 1) {
+    cumulative += weights[index];
+    if (randomValue <= cumulative) {
+      return index;
+    }
+  }
 
-		return frequency;
-	});
-
-	const totalWeight = weights.reduce((sum, value) => sum + value, 0);
-	const randomValue = Math.random() * totalWeight;
-
-	let cumulative = 0;
-	for (let index = 0; index < weights.length; index += 1) {
-		cumulative += weights[index];
-		if (randomValue <= cumulative) {
-			return index;
-		}
-	}
-
-	return items.length - 1;
+  return items.length - 1;
 };
 
 function App() {
@@ -137,8 +144,12 @@ function App() {
 
 	const [timerRunning, setTimerRunning] = useState(false);
 	const [timerRemaining, setTimerRemaining] = useState(challengeSeconds);
+	const [timerJustFinished, setTimerJustFinished] = useState(false);
 
 	const spinTimeoutRef = useRef<number | null>(null);
+	const timerFinishedFxTimeoutRef = useRef<number | null>(null);
+	const audioContextRef = useRef<AudioContext | null>(null);
+	const spinTickIntervalRef = useRef<number | null>(null);
 
 	const items = useMemo(() => parseItems(itemsInput), [itemsInput]);
 	const segmentAngle = items.length > 0 ? 360 / items.length : 360;
@@ -195,6 +206,7 @@ function App() {
 				if (previous <= 1) {
 					window.clearInterval(intervalId);
 					setTimerRunning(false);
+					setTimerJustFinished(true);
 					return 0;
 				}
 
@@ -206,15 +218,140 @@ function App() {
 	}, [timerRunning]);
 
 	useEffect(() => {
+		if (!timerJustFinished) return;
+
+		if (timerFinishedFxTimeoutRef.current) {
+			window.clearTimeout(timerFinishedFxTimeoutRef.current);
+		}
+
+		timerFinishedFxTimeoutRef.current = window.setTimeout(() => {
+			setTimerJustFinished(false);
+		}, 900);
+
 		return () => {
+			if (timerFinishedFxTimeoutRef.current) {
+				window.clearTimeout(timerFinishedFxTimeoutRef.current);
+			}
+		};
+	}, [timerJustFinished]);
+
+	useEffect(() => {
+		return () => {
+			if (spinTickIntervalRef.current) {
+				window.clearInterval(spinTickIntervalRef.current);
+			}
+
 			if (spinTimeoutRef.current) {
 				window.clearTimeout(spinTimeoutRef.current);
+			}
+
+			if (timerFinishedFxTimeoutRef.current) {
+				window.clearTimeout(timerFinishedFxTimeoutRef.current);
+			}
+
+			if (audioContextRef.current) {
+				void audioContextRef.current.close();
 			}
 		};
 	}, []);
 
+	const getAudioContext = useCallback(() => {
+		if (!audioContextRef.current) {
+			audioContextRef.current = new window.AudioContext();
+		}
+
+		if (audioContextRef.current.state === "suspended") {
+			void audioContextRef.current.resume();
+		}
+
+		return audioContextRef.current;
+	}, []);
+
+	const playTone = useCallback((
+		frequency: number,
+		durationMs: number,
+		volume: number,
+		type: OscillatorType = "sine",
+		startDelaySec = 0,
+	) => {
+		const audioContext = getAudioContext();
+		const startTime = audioContext.currentTime + startDelaySec;
+		const endTime = startTime + durationMs / 1000;
+
+		const oscillator = audioContext.createOscillator();
+		const gainNode = audioContext.createGain();
+
+		oscillator.type = type;
+		oscillator.frequency.setValueAtTime(frequency, startTime);
+
+		gainNode.gain.setValueAtTime(0.0001, startTime);
+		gainNode.gain.exponentialRampToValueAtTime(volume, startTime + 0.015);
+		gainNode.gain.exponentialRampToValueAtTime(0.0001, endTime);
+
+		oscillator.connect(gainNode);
+		gainNode.connect(audioContext.destination);
+
+		oscillator.start(startTime);
+		oscillator.stop(endTime + 0.02);
+	}, [getAudioContext]);
+
+	const playSpinTick = useCallback(() => {
+		const randomFrequency = 360 + Math.random() * 220;
+		playTone(randomFrequency, 55, 0.03, "triangle");
+	}, [playTone]);
+
+	const playSpinEndSound = useCallback(() => {
+		playTone(620, 120, 0.08, "triangle");
+		playTone(820, 180, 0.07, "sine", 0.12);
+	}, [playTone]);
+
+	const playFinalSecondsBeep = useCallback((second: number) => {
+		const baseFrequency = second <= 2 ? 980 : 820;
+		playTone(baseFrequency, 110, 0.07, "square");
+	}, [playTone]);
+
+	const playTimerFinishedSound = useCallback(() => {
+		playTone(520, 140, 0.08, "sine");
+		playTone(410, 160, 0.08, "triangle", 0.15);
+		playTone(310, 240, 0.1, "sawtooth", 0.32);
+	}, [playTone]);
+
+	useEffect(() => {
+		if (!isSpinning) {
+			if (spinTickIntervalRef.current) {
+				window.clearInterval(spinTickIntervalRef.current);
+				spinTickIntervalRef.current = null;
+			}
+			return;
+		}
+
+		playSpinTick();
+		spinTickIntervalRef.current = window.setInterval(() => {
+			playSpinTick();
+		}, 120);
+
+		return () => {
+			if (spinTickIntervalRef.current) {
+				window.clearInterval(spinTickIntervalRef.current);
+				spinTickIntervalRef.current = null;
+			}
+		};
+	}, [isSpinning, playSpinTick]);
+
+	useEffect(() => {
+		if (!timerRunning || timerRemaining <= 0 || timerRemaining > 5) return;
+		playFinalSecondsBeep(timerRemaining);
+	}, [timerRemaining, timerRunning, playFinalSecondsBeep]);
+
+	useEffect(() => {
+		if (!timerJustFinished) return;
+		playTimerFinishedSound();
+	}, [timerJustFinished, playTimerFinishedSound]);
+
 	const startSpin = () => {
 		if (items.length === 0 || isSpinning) return;
+
+		getAudioContext();
 
 		const selectedIndex = pickWeightedIndex(items, difficulty);
 		const centerAngle = (selectedIndex + 0.5) * segmentAngle;
@@ -237,10 +374,13 @@ function App() {
 		spinTimeoutRef.current = window.setTimeout(() => {
 			setWinner(items[selectedIndex]);
 			setIsSpinning(false);
+			playSpinEndSound();
 		}, spinSeconds * 1000);
 	};
 
 	const toggleChallengeTimer = () => {
+		getAudioContext();
+
 		if (timerRunning) {
 			setTimerRunning(false);
 			return;
@@ -254,8 +394,10 @@ function App() {
 	};
 
 	const restartChallengeTimer = () => {
+		getAudioContext();
 		setTimerRunning(false);
 		setTimerRemaining(challengeSeconds);
+		setTimerJustFinished(false);
 	};
 
 	const challengePercent = Math.max(
@@ -263,6 +405,8 @@ function App() {
 		0,
 	);
 	const canSpin = items.length > 0 && !isSpinning;
+	const timerUrgent = timerRunning && timerRemaining > 0 && timerRemaining <= 5;
+	const normalizedRotation = ((rotation % 360) + 360) % 360;
 
 	return (
 		<main data-theme={visualStyle} className="min-h-screen text-(--text-primary)">
@@ -291,7 +435,9 @@ function App() {
 						</button>
 					</header>
 
-					<aside className="w-full min-w-full lg:min-w-90 rounded-2xl border border-white/20 bg-(--panel-bg) p-4 shadow-xl backdrop-blur">
+					<aside
+						className={`w-full min-w-full lg:min-w-90 rounded-2xl border border-white/20 bg-(--panel-bg) p-4 shadow-xl backdrop-blur ${timerUrgent ? "timer-urgent" : ""} ${timerJustFinished ? "timer-finished" : ""}`}
+					>
 						<div className="mb-2 flex items-center justify-between">
 							<h2 className="font-title text-sm uppercase tracking-wider text-amber-200">
 								Cronômetro do desafio
@@ -330,10 +476,10 @@ function App() {
 
 				<section className="mt-auto rounded-3xl border border-white/15 bg-(--panel-muted) p-4 shadow-2xl backdrop-blur sm:p-6">
 					<div className="wheel-shell mx-auto mb-6">
-						<div className="pointer-triangle" />
+						<div className={`pointer-triangle ${isSpinning ? "pointer-active" : ""}`} />
 
 						<div
-							className="wheel-frame"
+							className={`wheel-frame ${isSpinning ? "wheel-frame-spinning" : ""}`}
 							style={{
 								transform: `rotate(${rotation}deg)`,
 								transition: `transform ${spinSeconds}s cubic-bezier(.17,.67,.2,1)`,
@@ -352,7 +498,12 @@ function App() {
 											<span
 												key={`${item}-badge-${index}`}
 												className="wheel-badge"
-												style={{ left: `${x}%`, top: `${y}%` }}
+												style={{
+													left: `${x}%`,
+													top: `${y}%`,
+													transform: `translate(-50%, -50%) rotate(${-normalizedRotation}deg)`,
+													transition: `transform ${spinSeconds}s cubic-bezier(.17,.67,.2,1)`,
+												}}
 												title={item}
 											>
 												{item.length > 11 ? `${item.slice(0, 11)}...` : item}
