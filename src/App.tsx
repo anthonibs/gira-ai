@@ -21,7 +21,7 @@ const SPIN_OPTIONS = [3, 5, 9, 15];
 const CHALLENGE_OPTIONS = [15, 30, 60, 120];
 
 const DEFAULT_CONFIG: WheelConfig = {
-	itemsInput: "1, 2, 3, 1, 2, 3, Passou a vez",
+	itemsInput: "1, 2, 3, 1, 2, 3, Passou à vez",
 	spinSeconds: 5,
 	challengeSeconds: 60,
 	difficulty: "equilibrado",
@@ -474,7 +474,7 @@ function App() {
 					</aside>
 				</div>
 
-				<section className="mt-auto rounded-3xl border border-white/15 bg-(--panel-muted) p-4 shadow-2xl backdrop-blur sm:p-6">
+				<section className="mt-auto rounded-3xl border border-white/15 bg-(--panel-muted) pt-8 pb-4 px-4 shadow-2xl backdrop-blur md:pt-12 md:pb-6">
 					<div className="wheel-shell mx-auto mb-6">
 						<div className={`pointer-triangle ${isSpinning ? "pointer-active" : ""}`} />
 
@@ -517,26 +517,27 @@ function App() {
 							type="button"
 							onClick={startSpin}
 							disabled={!canSpin}
-							className="abs-wheel-start border-[5px] border-white/90 rounded-full font-title text-base uppercase tracking-wide text-slate-900 disabled:cursor-not-allowed disabled:filter cursor-pointer disabled:grayscale disabled:opacity-70"
+							className="abs-wheel-start border-[5px] border-white/90 rounded-full font-title text-xs lg:text-base uppercase tracking-wide text-slate-900 disabled:cursor-not-allowed disabled:filter cursor-pointer disabled:grayscale disabled:opacity-70"
 						>
 							{isSpinning ? "Girando" : "Começar"}
 						</button>
 					</div>
 
 					<div className="mx-auto w-full max-w-xl p-4 rounded-2xl border border-white/20 bg-(--panel-bg) text-center">
-						<p className="mb-1 text-xs uppercase tracking-[0.18em] text-orange-200/85">
-							Ultimo sorteio
+						<p className="mb-1 text-[10px] lg:text-xs uppercase tracking-[0.18em] text-orange-200/85">
+							Último sorteio
 						</p>
-						<p className="font-title text-2xl text-amber-200 sm:text-3xl">
+						<p className="font-title text-xl text-amber-200 lg:text-3xl">
 							{winner ?? "Aguardando giro..."}
 						</p>
+
 						{items.length === 0 ? (
-							<p className="mt-2 text-xs text-slate-300/80">
+							<p className="mt-2 text-[10px] lg:text-xs text-slate-300/80">
 								Abra configurações e adicione itens para sortear.
 							</p>
 						) : null}
 						{items.length > 20 ? (
-							<p className="mt-2 text-xs text-slate-300/80">
+							<p className="mt-2 text-[10px] lg:text-xs text-slate-300/80">
 								Muitos itens para rótulos no disco. O sorteio continua normal.
 							</p>
 						) : null}

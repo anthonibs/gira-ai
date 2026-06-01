@@ -123,25 +123,11 @@ body {
 	pointer-events: none;
 }
 
-.wheel-core {
-	position: absolute;
-	inset: 50% auto auto 50%;
-	transform: translate(-50%, -50%);
-	width: 96px;
-	height: 96px;
-	border-radius: 999px;
-	border: 5px solid rgba(255, 255, 255, 0.85);
-	background: linear-gradient(145deg, #f8fafc, #fde68a);
-	display: grid;
-	place-items: center;
-	box-shadow: 0 8px 24px rgba(2, 6, 23, 0.35);
-}
-
 .wheel-badge {
 	position: absolute;
 	transform: translate(-50%, -50%);
 	max-width: 92px;
-	border-radius: 999px;
+	border-radius: 2rem;
 	padding: 2px 7px;
 	background: rgba(2, 6, 23, 0.75);
 	border: 1px solid rgba(255, 255, 255, 0.25);
@@ -191,8 +177,8 @@ body {
 	height: 0;
 	border-left: 16px solid transparent;
 	border-right: 16px solid transparent;
-	border-top: 30px solid #fde047;
-	filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+	border-top: 30px solid #f5d63e;
+	filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.54));
 }
 
 .pointer-active {
@@ -263,8 +249,7 @@ body {
 
 @media (max-width: 520px) {
 	.abs-wheel-start {
-		width: 96px;
-		height: 96px;	
-		font-size: 18px;
+		width: 84px;
+		height: 84px;	
 	}
 }
