@@ -554,7 +554,7 @@ function App() {
 			/>
 
 			<aside
-				className={`settings-drawer fixed right-0 top-0 z-40 h-full w-full max-w-md border-l border-white/15 bg-(--panel-bg) p-4 shadow-2xl backdrop-blur transition-transform sm:p-6 ${
+				className={`settings-drawer fixed right-0 top-0 z-40 h-screen w-full overflow-auto max-w-md border-l border-white/15 bg-(--panel-bg) p-6 shadow-2xl backdrop-blur transition-transform  ${
 					drawerOpen ? "translate-x-0" : "translate-x-full"
 				}`}
 			>
@@ -565,35 +565,39 @@ function App() {
 					<button
 						type="button"
 						onClick={() => setDrawerOpen(false)}
-						className="rounded-lg border border-white/20 px-3 py-1 text-sm hover:bg-white/10"
+						className="rounded-lg cursor-pointer border border-white/20 px-3 py-1 text-sm hover:bg-white/10"
 					>
 						Fechar
 					</button>
 				</div>
 
-				<div className="space-y-4 overflow-y-auto pb-12">
+				<div className="space-y-4 pb-12">
 					<div>
-						<label className="mb-2 block font-title text-xs uppercase tracking-[0.2em] text-orange-200/80">
+						<label htmlFor="items-input" className="mb-2 block font-title text-xs uppercase tracking-[0.2em] text-orange-200/80">
 							Lista ordenada
 						</label>
 						<textarea
+							id="items-input"
+							name="items-input"
 							value={itemsInput}
 							onChange={(event) => setItemsInput(event.target.value)}
 							rows={8}
-							className="w-full resize-y rounded-2xl border border-white/15 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none ring-orange-300/50 transition focus:ring"
-							placeholder="1, 2, 3, 1, 2, 3, Passou a vez"
+							className="w-full resize-y rounded-lg border border-white/15 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none ring-orange-300/50 transition focus:ring"
+							placeholder="1, 2, 3, 1, 2, 3, Passou à vez"
 						/>
 					</div>
 
 					<div className="grid gap-3 sm:grid-cols-2">
 						<div>
-							<label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-300">
+							<label htmlFor="spin-seconds" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-300">
 								Tempo da roleta
 							</label>
 							<select
+								id="spin-seconds"
+								name="spin-seconds"
 								value={spinSeconds}
 								onChange={(event) => setSpinSeconds(Number(event.target.value))}
-								className="w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2 text-sm outline-none ring-orange-300/50 transition focus:ring"
+								className="w-full rounded-lg border border-white/15 bg-slate-950/60 px-3 py-2 text-sm outline-none ring-orange-300/50 transition focus:ring"
 							>
 								{SPIN_OPTIONS.map((seconds) => (
 									<option key={seconds} value={seconds}>
@@ -604,10 +608,12 @@ function App() {
 						</div>
 
 						<div>
-							<label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-300">
+							<label htmlFor="challenge-seconds" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-300">
 								Tempo do desafio
 							</label>
 							<select
+								id="challenge-seconds"
+								name="challenge-seconds"
 								value={challengeSeconds}
 								onChange={(event) => {
 									const nextValue = Number(event.target.value);
@@ -616,7 +622,7 @@ function App() {
 										setTimerRemaining(nextValue);
 									}
 								}}
-								className="w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2 text-sm outline-none ring-orange-300/50 transition focus:ring"
+								className="w-full rounded-lg border border-white/15 bg-slate-950/60 px-3 py-2 text-sm outline-none ring-orange-300/50 transition focus:ring"
 							>
 								{CHALLENGE_OPTIONS.map((seconds) => (
 									<option key={seconds} value={seconds}>
@@ -630,15 +636,18 @@ function App() {
 					</div>
 
 					<div>
-						<label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-300">
+						<label htmlFor="difficulty" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-300">
 							Probabilidade
 						</label>
+
 						<select
+							id="difficulty"
+							name="difficulty"
 							value={difficulty}
 							onChange={(event) =>
 								setDifficulty(event.target.value as DifficultyMode)
 							}
-							className="w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2 text-sm outline-none ring-orange-300/50 transition focus:ring"
+							className="w-full rounded-lg border border-white/15 bg-slate-950/60 px-3 py-2 text-sm outline-none ring-orange-300/50 transition focus:ring"
 						>
 							<option value="equilibrado">Equilibrado</option>
 							<option value="facil">
@@ -651,15 +660,18 @@ function App() {
 					</div>
 
 					<div>
-						<label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-300">
+						<label htmlFor="style-visual" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-300">
 							Estilo visual
 						</label>
+
 						<select
+							id="style-visual"
+							name="style-visual"
 							value={visualStyle}
 							onChange={(event) =>
 								setVisualStyle(event.target.value as VisualStyle)
 							}
-							className="w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2 text-sm outline-none ring-orange-300/50 transition focus:ring"
+							className="w-full rounded-lg border border-white/15 bg-slate-950/60 px-3 py-2 text-sm outline-none ring-orange-300/50 transition focus:ring"
 						>
 							{VISUAL_STYLE_OPTIONS.map((styleOption) => (
 								<option key={styleOption} value={styleOption}>
@@ -669,7 +681,7 @@ function App() {
 						</select>
 					</div>
 
-					<div className="rounded-xl border border-white/10 bg-slate-950/45 p-3">
+					<div className="rounded-lg border border-white/10 bg-slate-950/45 p-3">
 						<h3 className="mb-2 text-sm font-semibold text-slate-200">
 							Itens ativos ({items.length})
 						</h3>
