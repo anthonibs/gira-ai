@@ -519,15 +519,15 @@ function App() {
 							disabled={!canSpin}
 							className="abs-wheel-start border-[5px] border-white/90 rounded-full font-title text-xs lg:text-base uppercase tracking-wide text-slate-900 disabled:cursor-not-allowed disabled:filter cursor-pointer disabled:grayscale disabled:opacity-70"
 						>
-							{isSpinning ? "Girando" : "Começar"}
+							{isSpinning ? "Girando" : "Girar"}
 						</button>
 					</div>
 
-					<div className="mx-auto w-full max-w-xl p-4 rounded-2xl border border-white/20 bg-(--panel-bg) text-center">
-						<p className="mb-1 text-[10px] lg:text-xs uppercase tracking-[0.18em] text-orange-200/85">
+					<div className="abs-roulette-result mx-auto w-full max-w-sm p-4 rounded-lg border border-t-2 border-t-(--accent-strong) border-white/10 text-center">
+						<p className="mb-1 text-[10px] lg:text-xs uppercase tracking-[0.18em] text-(--accent-strong)/85">
 							Último sorteio
 						</p>
-						<p className="font-title text-xl text-amber-200 lg:text-3xl">
+						<p className="font-title text-xl text-(--accent-strong) lg:text-3xl">
 							{winner ?? "Aguardando giro..."}
 						</p>
 

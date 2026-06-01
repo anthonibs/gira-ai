@@ -200,6 +200,11 @@ body {
 	animation: timerFinishedPop 0.8s ease;
 }
 
+.abs-roulette-result {
+	background-color: var(--panel-bg);
+	box-shadow: 0 -2px 24px color-mix(in oklab, var(--accent-strong) 12%, transparent);
+}
+
 @keyframes wheelSpinGlow {
 	0% {
 		box-shadow:
