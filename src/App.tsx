@@ -490,7 +490,7 @@ function App() {
 								? items.map((item, index) => {
 										const angle = segmentAngle * (index + 0.5);
 										const radian = ((angle - 90) * Math.PI) / 180;
-										const radius = 40;
+										const radius = 36;
 										const x = 50 + radius * Math.cos(radian);
 										const y = 50 + radius * Math.sin(radian);
 
@@ -506,7 +506,7 @@ function App() {
 												}}
 												title={item}
 											>
-												{item.length > 11 ? `${item.slice(0, 11)}...` : item}
+												{item}
 											</span>
 										);
 									})
