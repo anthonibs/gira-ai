@@ -61,6 +61,12 @@ export const useWheelAudio = () => {
 		playTone(820, 180, 0.07, { type: "sine", startDelaySec: 0.12 });
 	}, [playTone]);
 
+	const playPenaltySpinEndSound = useCallback(() => {
+		playTone(260, 140, 0.11, { type: "sawtooth" });
+		playTone(190, 180, 0.1, { type: "square", startDelaySec: 0.09 });
+		playTone(130, 240, 0.1, { type: "triangle", startDelaySec: 0.2 });
+	}, [playTone]);
+
 	const playFinalSecondsBeep = useCallback(
 		(second: number) => {
 			const baseFrequency = second <= 2 ? 980 : 820;
@@ -86,6 +92,7 @@ export const useWheelAudio = () => {
 	return {
 		ensureAudioReady,
 		playFinalSecondsBeep,
+		playPenaltySpinEndSound,
 		playSpinEndSound,
 		playSpinTick,
 		playTimerFinishedSound,

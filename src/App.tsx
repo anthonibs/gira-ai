@@ -5,7 +5,7 @@ import { WheelSection } from "./components/WheelSection";
 import { CHALLENGE_OPTIONS, SPIN_OPTIONS } from "./domain/wheel/constants";
 import { loadConfig, saveConfig } from "./domain/wheel/configStorage";
 import { buildWheelBackground, calculateNextRotation } from "./domain/wheel/presentation";
-import { parseItems, pickWeightedIndex } from "./domain/wheel/selection";
+import { getItemBaseWeight, parseItems, pickWeightedIndex } from "./domain/wheel/selection";
 import type { WheelConfig } from "./domain/wheel/types";
 import { useWheelAudio } from "./hooks/useWheelAudio";
 import { useChallengeTimer } from "./hooks/useChallengeTimer";
@@ -34,6 +34,7 @@ function App() {
   const {
     ensureAudioReady,
     playFinalSecondsBeep,
+    playPenaltySpinEndSound,
     playSpinEndSound,
     playSpinTick,
     playTimerFinishedSound,
@@ -122,8 +123,15 @@ function App() {
     }
 
     spinTimeoutRef.current = window.setTimeout(() => {
-      setWinner(items[selectedIndex]);
+      const selectedItem = items[selectedIndex];
+      const isPenaltyItem = getItemBaseWeight(selectedItem) === 10;
+
+      setWinner(selectedItem);
       setIsSpinning(false);
+      if (isPenaltyItem) {
+        playPenaltySpinEndSound();
+        return;
+      }
       playSpinEndSound();
     }, spinSeconds * 1000);
   };
