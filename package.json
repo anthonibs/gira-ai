@@ -2,7 +2,7 @@
 	"name": "gira-ai",
 	"description": "Personalize e gerencie sua própria lista de desafios. Gire a roleta e deixe o app ditar a próxima ação, trazendo mais emoção para festas e reuniões sociais.",
 	"private": true,
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"type": "module",
 	"author": {
 		"name": "Anthoni Broering dos Santos",
