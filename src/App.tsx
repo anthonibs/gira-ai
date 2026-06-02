@@ -10,6 +10,9 @@ import type { WheelConfig } from "./domain/wheel/types";
 import { useWheelAudio } from "./hooks/useWheelAudio";
 import { useChallengeTimer } from "./hooks/useChallengeTimer";
 import { THEME_DEFINITIONS } from "./styles/themes";
+import Footer from "./components/Footer";
+
+
 
 function App() {
   const initialConfig = useMemo(() => loadConfig(), []);
@@ -199,6 +202,8 @@ function App() {
           canSpin={canSpin}
           winner={winner}
         />
+
+       <Footer />
       </section>
 
       <SettingsDrawer
