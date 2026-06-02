@@ -12,7 +12,10 @@
 		"dev": "vite",
 		"build": "tsc -b && vite build",
 		"lint": "eslint .",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"major": "npm version major && git push && git push origin --tags",
+		"minor": "npm version minor && git push && git push origin --tags",
+		"patch": "npm version patch && git push && git push origin --tags"
 	},
 	"dependencies": {
 		"@tailwindcss/vite": "^4.3.0",
